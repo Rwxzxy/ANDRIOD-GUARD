@@ -63,7 +63,8 @@ jobs:
           if [ "${{ steps.variant.outputs.name }}" = "release" ]; then
             ./gradlew --stacktrace assembleRelease
           else
-            ./gradlew --stacktrace assembleDebug
+            # 没有签名时也编译一次 release（不签名、不上传），用来检查 R8 / ProGuard 规则
+            ./gradlew --stacktrace assembleDebug assembleRelease
           fi
 
       - name: Verify APK has no INTERNET permission
@@ -99,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: android-guard-${{ steps.variant.outputs.name }}-${{ github.run_number }}
-          path: app/build/outputs/apk/*/*.apk
+          path: app/build/outputs/apk/${{ steps.variant.outputs.name }}/*.apk
           if-no-files-found: error
 
       - name: Upload reports on failure
