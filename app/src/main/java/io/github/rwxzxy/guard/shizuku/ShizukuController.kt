@@ -138,10 +138,9 @@ class ShizukuController(private val context: Context) {
     }
 
     private suspend fun obtainService(): IShellService = bindMutex.withLock {
-        service?.let { existing ->
-            if (existing.asBinder().pingBinder()) return@withLock existing
-            service = null
-        }
+        val existing = service
+        if (existing != null && existing.asBinder().pingBinder()) return@withLock existing
+        service = null
         refresh()
         if (!_status.value.isReady) throw ShizukuUnavailableException("Shizuku 未就绪：${_status.value}")
 
